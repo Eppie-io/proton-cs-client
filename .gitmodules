@@ -1,0 +1,9 @@
+[submodule "console-toolkit"]
+	path = gitmodules/console-toolkit
+	url = ../console-toolkit.git
+[submodule "TuviSRPLib"]
+	path = gitmodules/TuviSRPLib
+	url = ../TuviSRPLib.git
+[submodule "TuviAuthProtonLib"]
+	path = gitmodules/TuviAuthProtonLib
+	url = ../TuviAuthProtonLib.git
