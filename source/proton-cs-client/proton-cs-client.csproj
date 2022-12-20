@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>proton_cs_client</RootNamespace>
+    <AnalysisLevel>6.0-all</AnalysisLevel>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <WarningLevel>9999</WarningLevel>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <WarningLevel>9999</WarningLevel>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\gitmodules\TuviSRPLib\TuviSRPLib\ProtonBase64Lib\ProtonBase64Lib.csproj" />
+    <ProjectReference Include="..\..\gitmodules\TuviSRPLib\TuviSRPLib\TuviSRPLib\TuviSRPLib.csproj" />
+  </ItemGroup>
+
+</Project>
