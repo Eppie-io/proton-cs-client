@@ -1,14 +1,6 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
+# This workflow will build and test the project
 
-# This workflow will build, test, sign and package a WPF or Windows Forms desktop application
-# built on .NET Core.
-# To learn how to migrate your existing application to .NET Core,
-# refer to https://docs.microsoft.com/en-us/dotnet/desktop-wpf/migration/convert-project-from-net-framework
-
-name: .NET Core Desktop
+name: Build and Test
 
 on:
   push:
@@ -62,6 +54,6 @@ jobs:
         Configuration: ${{ matrix.configuration }}
         
     ## Execute all unit tests in the solution
-    #- name: Execute unit tests
-    #  run: dotnet test $env:Solution_Name
+    - name: Execute unit tests
+      run: dotnet test $env:Solution_Name
     
