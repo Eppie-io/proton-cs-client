@@ -1,5 +1,5 @@
 source/.vs/
 source/proton-cs-client/obj/
 source/proton-cs-client/bin/
-source/sample/obj/
-source/sample/bin/
+source/test-project/bin/
+source/test-project/obj/

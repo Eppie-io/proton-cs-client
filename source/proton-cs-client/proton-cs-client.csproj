@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>proton_cs_client</RootNamespace>
+    <RootNamespace>Tuvi.Proton.Client</RootNamespace>
     <AnalysisLevel>6.0-all</AnalysisLevel>
   </PropertyGroup>
 
@@ -17,8 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\gitmodules\TuviSRPLib\TuviSRPLib\ProtonBase64Lib\ProtonBase64Lib.csproj" />
-    <ProjectReference Include="..\..\gitmodules\TuviSRPLib\TuviSRPLib\TuviSRPLib\TuviSRPLib.csproj" />
+    <ProjectReference Include="..\..\gitmodules\TuviAuthProtonLib\source\TuviAuthProtonLib\TuviAuthProtonLib.csproj" />
   </ItemGroup>
 
 </Project>
