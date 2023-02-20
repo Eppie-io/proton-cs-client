@@ -43,11 +43,20 @@ namespace Tuvi.Proton.Client
         public string UserAgent { get => _broker.UserAgent; set => _broker.UserAgent = value; }
         public string AppVersion { get => _broker.AppVersion; set => _broker.AppVersion = value; }
 
-        public int PasswordMode { get; private set; }
-        public string Scope { get; private set; }
+        private int _passwordMode;
+        public int PasswordMode
+        {
+            get { lock (_sharedStateLock) return _passwordMode; }
+        }
+        private string _scope;
+        public string Scope
+        {
+            get { lock (_sharedStateLock) return _scope; }
+        }
         public bool IsTwoFactor => Scopes?.FirstOrDefault((scope) => scope.Equals(TwoFactorScope, StringComparison.OrdinalIgnoreCase)) != null;
         public IEnumerable<string> Scopes => Scope?.Split(' ');
 
+        private object _sharedStateLock = new object();
         private SessionData? _sessionData;
         private string _refreshToken;
         private readonly Broker _broker;
@@ -63,17 +72,18 @@ namespace Tuvi.Proton.Client
             var data = await _broker.AuthenticateAsync(username, password, cancellationToken).ConfigureAwait(false);
 
             EnsureCorrectResponse(data);
-
-            _sessionData = new SessionData()
+            lock (_sharedStateLock)
             {
-                Uid = data.Uid,
-                TokenType = data.TokenType,
-                AccessToken = data.AccessToken,
-            };
-            Scope = data.Scope;
-            PasswordMode = data.PasswordMode;
-            _refreshToken = data.RefreshToken;
-
+                _sessionData = new SessionData()
+                {
+                    Uid = data.Uid,
+                    TokenType = data.TokenType,
+                    AccessToken = data.AccessToken,
+                };
+                _refreshToken = data.RefreshToken;
+                _scope = data.Scope;
+                _passwordMode = data.PasswordMode;
+            }
         }
 
         public async Task ProvideTwoFactorCodeAsync(string code, CancellationToken cancellationToken)
@@ -82,35 +92,53 @@ namespace Tuvi.Proton.Client
 
             EnsureCorrectResponse(data);
 
-            Scope = data.Scope;
+            lock (_sharedStateLock)
+            {
+                _scope = data.Scope;
+            }
         }
 
         public async Task LogoutAsync(CancellationToken cancellationToken)
         {
-            var sessionData = _sessionData;
+            SessionData? sessionData = null;
+            lock (_sharedStateLock)
+            {
+                sessionData = _sessionData;
 
-            _refreshToken = null;
-            _sessionData = null;
-            Scope = null;
-            PasswordMode = 0;
-
+                _sessionData = null;
+                _refreshToken = null;
+                _scope = null;
+                _passwordMode = 0;
+            }
             await _broker.LogoutAsync(GetSessionData(sessionData), cancellationToken).ConfigureAwait(false);
         }
 
         public async Task RefreshAsync(CancellationToken cancellationToken)
         {
-            var data = await _broker.RefreshAsync(GetSessionData(), _refreshToken, cancellationToken).ConfigureAwait(false);
+            var (sessionData, refreshToken) = GetRefreshData();
+            var data = await _broker.RefreshAsync(sessionData, refreshToken, cancellationToken).ConfigureAwait(false);
 
             EnsureCorrectResponse(data);
 
-            _refreshToken = data.RefreshToken;
-            Scope = data.Scope;
-            _sessionData = new SessionData
+            lock (_sharedStateLock)
             {
-                AccessToken = data.AccessToken,
-                TokenType = data.TokenType,
-                Uid = data.Uid,
-            };
+                _sessionData = new SessionData
+                {
+                    Uid = data.Uid,
+                    TokenType = data.TokenType,
+                    AccessToken = data.AccessToken,
+                };
+                _refreshToken = data.RefreshToken;
+                _scope = data.Scope;
+            }
+
+            (SessionData, string) GetRefreshData()
+            {
+                lock (_sharedStateLock)
+                {
+                    return (GetSessionData(_sessionData), _refreshToken);
+                }
+            }
         }
 
         public virtual void Load(string dump)
@@ -123,15 +151,18 @@ namespace Tuvi.Proton.Client
 
                 if (sessionDump.Version == 1)
                 {
-                    _refreshToken = sessionDump.RefreshToken;
-                    _sessionData = new SessionData()
+                    lock (_sharedStateLock)
                     {
-                        AccessToken = sessionDump.AccessToken,
-                        TokenType = sessionDump.TokenType,
-                        Uid = sessionDump.Uid,
-                    };
-                    PasswordMode = sessionDump.PasswordMode;
-                    Scope = sessionDump.Scope;
+                        _sessionData = new SessionData()
+                        {
+                            Uid = sessionDump.Uid,
+                            TokenType = sessionDump.TokenType,
+                            AccessToken = sessionDump.AccessToken,
+                        };
+                        _refreshToken = sessionDump.RefreshToken;
+                        _scope = sessionDump.Scope;
+                        _passwordMode = sessionDump.PasswordMode;
+                    }
                 }
             }
             catch (Exception ex) when (ex is JsonException || ex is NotSupportedException)
@@ -144,12 +175,15 @@ namespace Tuvi.Proton.Client
         {
             try
             {
-                return JsonSerializer.Serialize(
-                    value: SessionDump.Create(GetSessionData(), _refreshToken, PasswordMode, Scope),
-                    options: new JsonSerializerOptions
-                    {
-                        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-                    });
+                lock (_sharedStateLock)
+                {
+                    return JsonSerializer.Serialize(
+                        value: SessionDump.Create(GetSessionData(_sessionData), _refreshToken, _passwordMode, _scope),
+                        options: new JsonSerializerOptions
+                        {
+                            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                        });
+                }
             }
             catch (NotSupportedException ex)
             {
@@ -189,7 +223,10 @@ namespace Tuvi.Proton.Client
 
         private SessionData GetSessionData()
         {
-            return GetSessionData(_sessionData);
+            lock (_sharedStateLock)
+            {
+                return GetSessionData(_sessionData);
+            }
         }
 
         private static SessionData GetSessionData(SessionData? sessionData)
