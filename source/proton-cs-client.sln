@@ -7,9 +7,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "modules", "modules", "{29E7
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "proton-cs-client", "proton-cs-client\proton-cs-client.csproj", "{27B9B9CA-0B64-441E-AF2E-C9DC0D520B09}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "test-project", "test-project\test-project.csproj", "{0B4E5EBA-7F31-4B8E-9354-C7DBDA02A96B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "test-project", "test-project\test-project.csproj", "{0B4E5EBA-7F31-4B8E-9354-C7DBDA02A96B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TuviAuthProtonLib", "..\gitmodules\TuviAuthProtonLib\source\TuviAuthProtonLib\TuviAuthProtonLib.csproj", "{B67F61B3-4716-4BF3-83EC-1EFAC9AA9453}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TuviProtonPrimitiveLib", "..\gitmodules\TuviAuthProtonLib\source\TuviProtonPrimitiveLib\TuviProtonPrimitiveLib.csproj", "{EC96DEAA-2341-468D-8E01-DAAC02B446AF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,12 +31,17 @@ Global
 		{B67F61B3-4716-4BF3-83EC-1EFAC9AA9453}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B67F61B3-4716-4BF3-83EC-1EFAC9AA9453}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B67F61B3-4716-4BF3-83EC-1EFAC9AA9453}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC96DEAA-2341-468D-8E01-DAAC02B446AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC96DEAA-2341-468D-8E01-DAAC02B446AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC96DEAA-2341-468D-8E01-DAAC02B446AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC96DEAA-2341-468D-8E01-DAAC02B446AF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{B67F61B3-4716-4BF3-83EC-1EFAC9AA9453} = {29E7190E-5817-4AA2-9926-1536D9947269}
+		{EC96DEAA-2341-468D-8E01-DAAC02B446AF} = {29E7190E-5817-4AA2-9926-1536D9947269}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {523F7293-F271-47C3-B92A-D3D7831B52E5}
