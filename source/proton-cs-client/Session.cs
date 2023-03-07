@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
@@ -26,6 +25,7 @@ using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using Tuvi.Auth.Proton;
+using Tuvi.Auth.Proton.Messages.Payloads;
 using Tuvi.Auth.Services;
 using Tuvi.Proton.Client.Exceptions;
 using Tuvi.Proton.Primitive.Messages;
@@ -53,10 +53,21 @@ namespace Tuvi.Proton.Client
         {
             get { lock (_sharedStateLock) return _scope; }
         }
-        public bool IsTwoFactor => Scopes?.FirstOrDefault((scope) => scope.Equals(TwoFactorScope, StringComparison.OrdinalIgnoreCase)) != null;
         public IEnumerable<string> Scopes => Scope?.Split(' ');
 
-        private object _sharedStateLock = new object();
+        private bool _isTwoFactor;
+        public bool IsTwoFactor
+        {
+            get { lock (_sharedStateLock) return _isTwoFactor; }
+        }
+
+        private bool _isTOTP;
+        public bool IsTOTP
+        {
+            get { lock (_sharedStateLock) return _isTOTP; }
+        }
+
+        private readonly object _sharedStateLock = new object();
         private SessionData? _sessionData;
         private string _refreshToken;
         private readonly Broker _broker;
@@ -72,6 +83,9 @@ namespace Tuvi.Proton.Client
             var data = await _broker.AuthenticateAsync(username, password, cancellationToken).ConfigureAwait(false);
 
             EnsureCorrectResponse(data);
+
+            var twoFAStatus = (TwoFAStatus)data.TwoFactorSettings.Enabled;
+
             lock (_sharedStateLock)
             {
                 _sessionData = new SessionData()
@@ -83,6 +97,8 @@ namespace Tuvi.Proton.Client
                 _refreshToken = data.RefreshToken;
                 _scope = data.Scope;
                 _passwordMode = data.PasswordMode;
+                _isTwoFactor = twoFAStatus != TwoFAStatus.None;
+                _isTOTP = twoFAStatus.HasFlag(TwoFAStatus.TOTP);
             }
         }
 
@@ -109,6 +125,8 @@ namespace Tuvi.Proton.Client
                 _refreshToken = null;
                 _scope = null;
                 _passwordMode = 0;
+                _isTwoFactor = false;
+                _isTOTP = false;
             }
             await _broker.LogoutAsync(GetSessionData(sessionData), cancellationToken).ConfigureAwait(false);
         }
@@ -130,6 +148,8 @@ namespace Tuvi.Proton.Client
                 };
                 _refreshToken = data.RefreshToken;
                 _scope = data.Scope;
+                _isTwoFactor = false;
+                _isTOTP = false;
             }
 
             (SessionData, string) GetRefreshData()
@@ -162,6 +182,8 @@ namespace Tuvi.Proton.Client
                         _refreshToken = sessionDump.RefreshToken;
                         _scope = sessionDump.Scope;
                         _passwordMode = sessionDump.PasswordMode;
+                        _isTwoFactor = false;
+                        _isTOTP = false;
                     }
                 }
             }
