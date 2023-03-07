@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text.Json;
@@ -126,6 +125,8 @@ namespace Tuvi.Proton.Client
                 _refreshToken = null;
                 _scope = null;
                 _passwordMode = 0;
+                _isTwoFactor = false;
+                _isTOTP = false;
             }
             await _broker.LogoutAsync(GetSessionData(sessionData), cancellationToken).ConfigureAwait(false);
         }
@@ -147,6 +148,8 @@ namespace Tuvi.Proton.Client
                 };
                 _refreshToken = data.RefreshToken;
                 _scope = data.Scope;
+                _isTwoFactor = false;
+                _isTOTP = false;
             }
 
             (SessionData, string) GetRefreshData()
@@ -179,6 +182,8 @@ namespace Tuvi.Proton.Client
                         _refreshToken = sessionDump.RefreshToken;
                         _scope = sessionDump.Scope;
                         _passwordMode = sessionDump.PasswordMode;
+                        _isTwoFactor = false;
+                        _isTOTP = false;
                     }
                 }
             }
