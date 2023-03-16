@@ -11,9 +11,15 @@ updates:
     directory: "/source/" # Location of package manifests
     schedule:
       interval: "daily"
+    reviewers:
+      - "al-kau"
+      - "ValeraFinebits"
       
   # Maintain dependencies for gitsubmodule
   - package-ecosystem: "gitsubmodule"
     directory: "/" # Location of package manifests
     schedule:
       interval: "daily"
+    reviewers:
+      - "al-kau"
+      - "ValeraFinebits"
