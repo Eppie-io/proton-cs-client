@@ -24,7 +24,7 @@ namespace Tuvi.Proton.Client.Test.Data
     {
         public ISRPClient CreateClient()
         {
-            return new ProtonSRPClient(new FakePGPModule());
+            return new ProtonSRPClient();
         }
     }
 }
