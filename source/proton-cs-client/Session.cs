@@ -34,50 +34,114 @@ using Tuvi.RestClient;
 
 namespace Tuvi.Proton.Client
 {
+    /// <summary>
+    /// The Seesion class provides connection to the Proton API, execution of requests, loading and storing sessions.
+    /// </summary>
     public class Session : Tuvi.RestClient.Client
     {
-        private static string TwoFactorScope => "twofactor";
-
-        public Uri RedirectUri { get => _broker.RedirectUri; set => _broker.RedirectUri = value; }
-        public string ClientSecret { get => _broker.ClientSecret; set => _broker.ClientSecret = value; }
-        public string UserAgent { get => _broker.UserAgent; set => _broker.UserAgent = value; }
+        /// <summary>
+        /// This is the version of the application that is implementing the client.
+        /// </summary>
         public string AppVersion { get => _broker.AppVersion; set => _broker.AppVersion = value; }
 
-        private int _passwordMode;
+        /// <summary>
+        /// Secret token for the new Session object that is added to the payload with key `ClientSecret`. [OPTIONAL]
+        /// </summary>
+        public string ClientSecret { get => _broker.ClientSecret; set => _broker.ClientSecret = value; }
+
+        /// <summary>
+        /// This is the refresh redirect url.
+        /// </summary>
+        public Uri RedirectUri { get => _broker.RedirectUri; set => _broker.RedirectUri = value; }
+
+        /// <summary>
+        /// This helps us to understand on what type of platforms the client is being used. [OPTIONAL]
+        /// </summary>
+        public string UserAgent { get => _broker.UserAgent; set => _broker.UserAgent = value; }
+
+        /// <summary>
+        /// Gets a value that indicates the password mode. It is filled out after login.
+        /// </summary>
+        /// <seealso cref="Auth.Proton.Messages.Payloads.PasswordMode"/>
         public int PasswordMode
         {
             get { lock (_sharedStateLock) return _passwordMode; }
         }
-        private string _scope;
+        private int _passwordMode;
+
+        /// <summary>
+        /// The API permission scopes. It is filled out after login.
+        /// </summary>
         public string Scope
         {
             get { lock (_sharedStateLock) return _scope; }
         }
+        private string _scope;
+
+        /// <summary>
+        /// This is a collection of permission scope. It is filled out after login.
+        /// </summary>
         public IEnumerable<string> Scopes => Scope?.Split(' ');
 
-        private bool _isTwoFactor;
+        /// <summary>
+        /// Gets a value that specifies whether two-factor authentication is enabled. It is filled out after login.
+        /// </summary>
         public bool IsTwoFactor
         {
             get { lock (_sharedStateLock) return _isTwoFactor; }
         }
+        private bool _isTwoFactor;
 
-        private bool _isTOTP;
+        /// <summary>
+        /// Gets a value that specifies whether two-factor authentication is TOTP. It is filled out after login.
+        /// </summary>
         public bool IsTOTP
         {
             get { lock (_sharedStateLock) return _isTOTP; }
         }
+        private bool _isTOTP;
 
         private readonly object _sharedStateLock = new object();
         private SessionData? _sessionData;
         private string _refreshToken;
         private readonly Broker _broker;
 
+        /// <summary>
+        /// Constructs a new instance of the Session class.
+        /// </summary>
+        /// <param name="httpClient">The HttpClient for making http requests.</param>
+        /// <param name="srpClientFactory">A factory abstraction that can create <see cref="ISRPClient"> instances.</param>
+        /// <param name="host">The base API url. The httpClient.BaseAddress will be used
+        /// as the base API url if the host parameter is null.</param>
         public Session(HttpClient httpClient, ISRPClientFactory srpClientFactory, Uri host)
             : base(httpClient, host)
         {
             _broker = new Broker(httpClient, srpClientFactory, host);
         }
 
+        /// <summary>
+        /// Constructs a new instance of the Session class with a default ISRPClientFactory
+        /// </summary>
+        /// <param name="httpClient">The HttpClient for making http requests.</param>
+        /// <param name="host">The base API url. The httpClient.BaseAddress will be used
+        /// as the base API url if the host parameter is null.</param>
+        public Session(HttpClient httpClient, Uri host)
+            : base(httpClient, host)
+        {
+            _broker = new Broker(httpClient, host);
+        }
+
+        /// <summary>
+        /// Starts the asynchronous authentication operation.
+        /// </summary>
+        /// <param name="username">Proton account username.</param>
+        /// <param name="password">Proton account password.</param>
+        /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
+        /// <returns>The task object representing the asynchronous operation.</returns>
+        /// <exception cref="ProtonSessionException"></exception>
+        /// <exception cref="ProtonSessionRequestException"></exception>
+        /// <exception cref="Auth.Proton.Exceptions.AuthProtonException"></exception>
+        /// <exception cref="Auth.Proton.Exceptions.AuthProtonArgumentException"></exception>
         public async Task LoginAsync(string username, string password, CancellationToken cancellationToken)
         {
             var data = await _broker.AuthenticateAsync(username, password, cancellationToken).ConfigureAwait(false);
@@ -102,6 +166,12 @@ namespace Tuvi.Proton.Client
             }
         }
 
+        /// <summary>
+        /// Provides Two Factor Authentication Code to the API asynchronously.
+        /// </summary>
+        /// <param name="code">This is the TOTP code represented by a string of numbers.</param>
+        /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
+        /// <returns>The task object representing the asynchronous operation.</returns>
         public async Task ProvideTwoFactorCodeAsync(string code, CancellationToken cancellationToken)
         {
             var data = await _broker.ProvideTwoFactorCodeAsync(GetSessionData(), code, cancellationToken).ConfigureAwait(false);
@@ -114,6 +184,11 @@ namespace Tuvi.Proton.Client
             }
         }
 
+        /// <summary>
+        /// Closes session asynchronously.
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
+        /// <returns>The task object representing the asynchronous operation.</returns>
         public async Task LogoutAsync(CancellationToken cancellationToken)
         {
             SessionData? sessionData = null;
@@ -131,6 +206,11 @@ namespace Tuvi.Proton.Client
             await _broker.LogoutAsync(GetSessionData(sessionData), cancellationToken).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Refreshes AccessToken asynchronously.
+        /// </summary>
+        /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
+        /// <returns>The task object representing the asynchronous operation.</returns>
         public async Task RefreshAsync(CancellationToken cancellationToken)
         {
             var (sessionData, refreshToken) = GetRefreshData();
@@ -161,6 +241,11 @@ namespace Tuvi.Proton.Client
             }
         }
 
+        /// <summary>
+        /// Loads Proton session.
+        /// </summary>
+        /// <param name="dump">The output generated by <see cref="Dump()"/></param>
+        /// <exception cref="ProtonSessionException"></exception>
         public virtual void Load(string dump)
         {
             try
@@ -193,6 +278,11 @@ namespace Tuvi.Proton.Client
             }
         }
 
+        /// <summary>
+        /// Provides session dump. If you want to reuse the session, then dump it and store the values.
+        /// </summary>
+        /// <returns>The result will contain some data that will be needed for <see cref="RefreshAsync(CancellationToken)"/></returns>
+        /// <exception cref="ProtonSessionException"></exception>
         public virtual string Dump()
         {
             try
@@ -213,6 +303,16 @@ namespace Tuvi.Proton.Client
             }
         }
 
+        /// <summary>
+        /// Makes a Proton API request asynchronously.
+        /// </summary>
+        /// <typeparam name="TResponse">The type of response message. <seealso cref="Response"> </typeparam>
+        /// <typeparam name="TRequest">The type of request message. <seealso cref="Request"> </typeparam>
+        /// <param name="message">The Proton API message.</param>
+        /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
+        /// <returns>The task object representing the asynchronous operation.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ProtonSessionRequestException"></exception>
         public async Task<HttpStatusCode> RequestAsync<TResponse, TRequest>(ProtonMessage<TResponse, TRequest> message, CancellationToken cancellationToken)
             where TResponse : Response
             where TRequest : Request

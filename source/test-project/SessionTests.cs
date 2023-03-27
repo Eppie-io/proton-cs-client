@@ -32,7 +32,7 @@ namespace Tuvi.Proton.Client.Test
         [SetUp]
         public void Setup()
         {
-            ProtonSession = new Session(new HttpClient(), new SRPClientFactory(), SessionTestData.FakeUri)
+            ProtonSession = new Session(new HttpClient(), SessionTestData.FakeUri)
             {
                 AppVersion = SessionTestData.FakeAppVersion,
                 UserAgent = SessionTestData.FakeUserAgent,

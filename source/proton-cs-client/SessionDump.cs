@@ -85,7 +85,7 @@ namespace Tuvi.Proton.Client
 
         public override int GetHashCode()
         {
-            return $"{Version}#{Uid}#{AccessToken}#{TokenType}#{RefreshToken}#{PasswordMode}#{Scope}".GetHashCode();
+            return (Version, Uid, AccessToken, TokenType, RefreshToken, PasswordMode, Scope).GetHashCode();
         }
 
         public static bool operator ==(SessionDump left, SessionDump right)
