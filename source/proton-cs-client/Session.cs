@@ -28,6 +28,7 @@ using Tuvi.Auth.Proton;
 using Tuvi.Auth.Proton.Messages.Payloads;
 using Tuvi.Auth.Services;
 using Tuvi.Proton.Client.Exceptions;
+using Tuvi.Proton.Client.Messages;
 using Tuvi.Proton.Primitive.Messages;
 using Tuvi.Proton.Primitive.Messages.Payloads;
 using Tuvi.RestClient;
@@ -35,7 +36,7 @@ using Tuvi.RestClient;
 namespace Tuvi.Proton.Client
 {
     /// <summary>
-    /// The Seesion class provides connection to the Proton API, execution of requests, loading and storing sessions.
+    /// The Session class provides connection to the Proton API, execution of requests, loading and storing sessions.
     /// </summary>
     public class Session : Tuvi.RestClient.Client
     {
@@ -142,6 +143,7 @@ namespace Tuvi.Proton.Client
         /// <exception cref="ProtonSessionRequestException"></exception>
         /// <exception cref="Auth.Proton.Exceptions.AuthProtonException"></exception>
         /// <exception cref="Auth.Proton.Exceptions.AuthProtonArgumentException"></exception>
+        /// <exception cref="Auth.Proton.Exceptions.AuthProtonRequestException"></exception>
         public async Task LoginAsync(string username, string password, CancellationToken cancellationToken)
         {
             var data = await _broker.AuthenticateAsync(username, password, cancellationToken).ConfigureAwait(false);
@@ -172,6 +174,10 @@ namespace Tuvi.Proton.Client
         /// <param name="code">This is the TOTP code represented by a string of numbers.</param>
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
         /// <returns>The task object representing the asynchronous operation.</returns>
+        /// <exception cref="ProtonSessionException"></exception>
+        /// <exception cref="ProtonSessionRequestException"></exception>
+        /// <exception cref="Auth.Proton.Exceptions.AuthProtonArgumentException"></exception>
+        /// <exception cref="Auth.Proton.Exceptions.AuthProtonRequestException"></exception>
         public async Task ProvideTwoFactorCodeAsync(string code, CancellationToken cancellationToken)
         {
             var data = await _broker.ProvideTwoFactorCodeAsync(GetSessionData(), code, cancellationToken).ConfigureAwait(false);
@@ -189,6 +195,8 @@ namespace Tuvi.Proton.Client
         /// </summary>
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
         /// <returns>The task object representing the asynchronous operation.</returns>
+        /// <exception cref="Auth.Proton.Exceptions.AuthProtonArgumentException"></exception>
+        /// <exception cref="Auth.Proton.Exceptions.AuthProtonRequestException"></exception>
         public async Task LogoutAsync(CancellationToken cancellationToken)
         {
             SessionData? sessionData = null;
@@ -211,6 +219,8 @@ namespace Tuvi.Proton.Client
         /// </summary>
         /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
         /// <returns>The task object representing the asynchronous operation.</returns>
+        /// <exception cref="Auth.Proton.Exceptions.AuthProtonArgumentException"></exception>
+        /// <exception cref="Auth.Proton.Exceptions.AuthProtonRequestException"></exception>
         public async Task RefreshAsync(CancellationToken cancellationToken)
         {
             var (sessionData, refreshToken) = GetRefreshData();
@@ -341,6 +351,64 @@ namespace Tuvi.Proton.Client
                     code: message.HttpStatus,
                     response: message.Response);
             }
+        }
+
+        /// <summary>
+        /// Makes a Proton API request asynchronously.
+        /// </summary>
+        /// <typeparam name="TContent">The content type of the response.</typeparam>
+        /// <typeparam name="TPayload">The payload type of the request.</typeparam>
+        /// <param name="endpoint">API endpoint.</param>
+        /// <param name="method">HTTP protocol method.</param>
+        /// <param name="payload">A request payload that will be serialized to JSON.</param>
+        /// <param name="headers">Additional http headers.</param>
+        /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
+        /// <returns>Returns the value that results from deserializing the content as JSON.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ProtonSessionRequestException"></exception>
+        public async Task<TContent> RequestAsync<TContent, TPayload>(Uri endpoint, HttpMethod method, TPayload payload, HeaderCollection headers, CancellationToken cancellationToken)
+        {
+            var message = new CustomMessage<TContent, TPayload>(endpoint, method, payload)
+            {
+                CustomHeaders = headers
+            };
+
+            await RequestAsync(message, cancellationToken).ConfigureAwait(false);
+
+            if (message.Response is null)
+            {
+                return default;
+            }
+
+            return message.Response.Content;
+        }
+
+        /// <summary>
+        /// Makes a Proton API request asynchronously.
+        /// </summary>
+        /// <typeparam name="TContent">The content type of the response.</typeparam>
+        /// <param name="endpoint">API endpoint.</param>
+        /// <param name="method">HTTP protocol method.</param>
+        /// <param name="headers">Additional http headers.</param>
+        /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
+        /// <returns>Returns the value that results from deserializing the content as JSON.</returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        /// <exception cref="ProtonSessionRequestException"></exception>
+        public async Task<TContent> RequestAsync<TContent>(Uri endpoint, HttpMethod method, HeaderCollection headers, CancellationToken cancellationToken)
+        {
+            var message = new CustomMessage<TContent>(endpoint, method)
+            {
+                CustomHeaders = headers
+            };
+
+            await RequestAsync(message, cancellationToken).ConfigureAwait(false);
+
+            if (message.Response is null)
+            {
+                return default;
+            }
+
+            return message.Response.Content;
         }
 
         private SessionData GetSessionData()
