@@ -146,7 +146,8 @@ namespace Tuvi.Proton.Client
         /// <exception cref="Auth.Proton.Exceptions.AuthProtonRequestException"></exception>
         public async Task LoginAsync(string username, string password, CancellationToken cancellationToken)
         {
-            var data = await _broker.AuthenticateAsync(username, password, cancellationToken).ConfigureAwait(false);
+            var authenticator = await _broker.BuildAuthenticatorAsync(username, password, cancellationToken).ConfigureAwait(false);
+            var data = await authenticator(cancellationToken).ConfigureAwait(false);
 
             EnsureCorrectResponse(data);
 
@@ -409,6 +410,18 @@ namespace Tuvi.Proton.Client
             }
 
             return message.Response.Content;
+        }
+
+        public void SetHumanVerification(string type, string token)
+        {
+            _broker.HumanVerificationTokenType = type;
+            _broker.HumanVerificationToken = token;
+        }
+
+        public void ResetHumanVerification()
+        {
+            _broker.HumanVerificationTokenType = string.Empty;
+            _broker.HumanVerificationToken = string.Empty;
         }
 
         private SessionData GetSessionData()

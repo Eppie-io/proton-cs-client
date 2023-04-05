@@ -16,15 +16,20 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+using Tuvi.Auth.Proton.Exceptions;
 using Tuvi.Proton.Client;
 using Tuvi.Proton.Client.Sample.Messages;
+using Tuvi.Proton.Primitive.Exceptions;
+using Tuvi.Proton.Primitive.Messages.Errors;
+using Tuvi.Proton.Primitive.Messages.Payloads;
 using Tuvi.RestClient;
 
 try
 {
     using var httpClient = new HttpClient();
+    var host = new Uri("https://mail-api.proton.me");
 
-    var proton = new Session(httpClient, new Uri("https://mail-api.proton.me"))
+    var proton = new Session(httpClient, host)
     {
         AppVersion = "Other",
         UserAgent = "Sample",
@@ -38,7 +43,22 @@ try
     Console.Write("Password: ");
     var password = Console.ReadLine();
 
-    await proton.LoginAsync(user, password, CancellationToken.None).ConfigureAwait(false);
+    try
+    {
+        await proton.LoginAsync(user, password, CancellationToken.None).ConfigureAwait(false);
+    }
+    catch (ProtonRequestException ex)
+    {
+        var (method, token) = TryHumanVerification(ex.ErrorInfo, host);
+        if (string.IsNullOrEmpty(method) || string.IsNullOrEmpty(token))
+        {
+            throw;
+        }
+
+        proton.SetHumanVerification(method, token);
+        await proton.LoginAsync(user, password, CancellationToken.None).ConfigureAwait(false);
+        proton.ResetHumanVerification();
+    }
 
     if (proton.IsTwoFactor)
     {
@@ -82,7 +102,7 @@ try
 
     await proton.LogoutAsync(CancellationToken.None).ConfigureAwait(false);
 }
-catch (Tuvi.Proton.Primitive.Exceptions.ProtonRequestException ex)
+catch (ProtonRequestException ex)
 {
     PrintError($"""
         ProtonRequestException:
@@ -113,4 +133,48 @@ static void PrintMessage(string message)
     Console.ForegroundColor = ConsoleColor.Cyan;
     Console.WriteLine(message);
     Console.ForegroundColor = color;
+}
+
+static (string? method, string? token) ShowHumanVerificationMessage(HumanVerificationDetails details, Uri host)
+{
+    Console.WriteLine($"""
+        Proton '{details.Title}'
+        Description: {(string.IsNullOrEmpty(details.Description) ? "None" : details.Description)}
+        Methods: {string.Join(", ", details.HumanVerificationMethods)}
+        """);
+
+    var method = details.HumanVerificationMethods.Count == 1 ? details.HumanVerificationMethods.First()
+                                                             : string.Empty;
+
+    while (!details.HumanVerificationMethods.Contains(method))
+    {
+        Console.Write($"Select verification method: ");
+        method = Console.ReadLine();
+    }
+
+    if (string.Equals("captcha", method, StringComparison.OrdinalIgnoreCase))
+    {
+        Console.WriteLine($"Captcha url: {new Uri(host, details.CaptchaUri)}");
+    }
+
+    Console.Write($"Enter verification token: ");
+    var token = Console.ReadLine();
+
+    return (method, token);
+}
+
+static (string? method, string? token) TryHumanVerification(RequestErrorInfo error, Uri host)
+{
+    if (error?.IsHumanVerificationRequired() != true || error is not CommonResponse response)
+    {
+        return (null, null);
+    }
+
+    var details = response.ReadDetails<HumanVerificationDetails>();
+    if (details is null)
+    {
+        return (null, null);
+    }
+
+    return ShowHumanVerificationMessage(details, host);
 }
