@@ -3,5 +3,6 @@ source/proton-cs-client/obj/
 source/proton-cs-client/bin/
 source/sample/bin/
 source/sample/obj/
+source/sample/sample.csproj.user
 source/test-project/bin/
 source/test-project/obj/
