@@ -16,10 +16,39 @@ The official Python client can be found [here](https://github.com/ProtonMail/pro
 
 ### Installation
 
-For installation clone this repository recursively with submodules:
+- Add this repository as a submodule to your git repository;
+- Update submodules recursively;
+- Add the following projects to the solution:
+  - `proton-cs-client.csproj`
+  - `TuviAuthProtonLib.csproj`
+  - `TuviProtonPrimitiveLib.csproj`
+  - `TuviRestClientLib.csproj`
+  - `ProtonBase64Lib.scproj`
+  - `TuviSRPLib.scproj`
+- Add the `proton-cs-client.csproj` project reference to your projects that will use `Proton`.
 
 ```shell
-git clone --recurse-submodules https://github.com/Eppie-io/proton-cs-client.git
+
+cd <repository folder path>
+
+git submodule add https://github.com/Eppie-io/proton-cs-client.git submodules/proton-cs-client
+
+git submodule update --init --recursive
+
+# Unix/Linux shell
+
+# globstar feature from Bash version 4 or higher.
+# If set, the pattern ** used in a filename expansion context
+shopt -s globstar 
+
+dotnet sln <solution-file> add --solution-folder submodules **/proton-cs-client.csproj **/*Lib.csproj
+
+dotnet add <project-file> reference **/proton-cs-client.csproj
+
+# Windows PowerShell
+dotnet sln <solution-file> add --solution-folder submodules (ls -r **/proton-cs-client.csproj) (ls -r **/*Lib.csproj)
+
+dotnet add <project-file> reference (ls -r **/proton-cs-client.csproj)
 ```
 
 ## Usage
@@ -48,15 +77,12 @@ Next, check if two-factor authentication is enabled. If so, provide TOTP code wi
 
 ```C#
 await proton.LoginAsync(
-    username: "user@proton.me",
-    password: "password",
-    cancellationToken: CancellationToken.None);
+    username: "<user@proton.me>",
+    password: "<password>");
 
 if (proton.IsTwoFactor && proton.IsTOTP)
 {
-    await proton.ProvideTwoFactorCodeAsync(
-        code: "123456", 
-        cancellationToken: CancellationToken.None);
+    await proton.ProvideTwoFactorCodeAsync(code: "<123456>");
 }
 ```
 
@@ -65,7 +91,7 @@ if (proton.IsTwoFactor && proton.IsTOTP)
 `LogoutAsync` closes the session.
 
 ```C#
-await proton.LogoutAsync(cancellationToken: CancellationToken.None);
+await proton.LogoutAsync();
 ```
 
 ### Refresh Session
@@ -73,7 +99,7 @@ await proton.LogoutAsync(cancellationToken: CancellationToken.None);
 `RefreshAsync` asynchronously refreshes `AccessToken`.
 
 ```C#
-await proton.RefreshAsync(cancellationToken: CancellationToken.None);
+await proton.RefreshAsync();
 ```
 
 ### Store session
@@ -101,10 +127,10 @@ Sample result:
 
 ### Load session
 
-To `Load` previvously saved session, provide a JSON formatted string created by `Dump`:
+To `Load` previously saved session, provide a JSON formatted string created by `Dump`:
 
 ```C#
-string protonDump = ExampleLoadProtonDumpMethod();
+string protonDump = "<previously saved session state>";
 proton.Load(dump: protonDump);
 ```
 
@@ -114,12 +140,12 @@ After successful authentication you are ready to make API calls to Proton server
 
 `RequestAsync` makes a request asynchronously.
 
-The following demo shows how to count the number of messages in the maillbox. This will return a value of type `TotalMessagesContent` that results from deserializing the content as JSON.
+The following demo shows how to count the number of messages in the mailbox. This will return a value of type `TotalMessagesContent` that results from deserializing the content as JSON.
 
 Example:
 
 ```C#
-// TotalMessagesContent type
+// The type represents the JSON response value
 struct TotalMessagesContent
 {
     public int Code { get; set; } 
@@ -136,10 +162,9 @@ struct TotalMessagesContent
     }
 }
 
-// api request
+// Api request
 TotalMessagesContent countResponse = await proton.RequestAsync<TotalMessagesContent>(
     endpoint: new Uri("/mail/v4/messages/count", UriKind.Relative),
     method: HttpMethod.Get,
-    headers: null,
-    cancellationToken: CancellationToken.None);
+    headers: null);
 ```
