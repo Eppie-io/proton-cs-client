@@ -16,7 +16,6 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-using Tuvi.Auth.Proton.Exceptions;
 using Tuvi.Proton.Client;
 using Tuvi.Proton.Client.Sample.Messages;
 using Tuvi.Proton.Primitive.Exceptions;
@@ -32,8 +31,6 @@ try
     var proton = new Session(httpClient, host)
     {
         AppVersion = "Other",
-        UserAgent = "Sample",
-        ClientSecret = string.Empty,
         RedirectUri = new Uri("https://protonmail.ch")
     };
 
@@ -45,7 +42,7 @@ try
 
     try
     {
-        await proton.LoginAsync(user, password, CancellationToken.None).ConfigureAwait(false);
+        await proton.LoginAsync(user, password).ConfigureAwait(false);
     }
     catch (ProtonRequestException ex)
     {
@@ -56,7 +53,7 @@ try
         }
 
         proton.SetHumanVerification(method, token);
-        await proton.LoginAsync(user, password, CancellationToken.None).ConfigureAwait(false);
+        await proton.LoginAsync(user, password).ConfigureAwait(false);
         proton.ResetHumanVerification();
     }
 
@@ -69,7 +66,7 @@ try
 
         Console.Write("TOTP code: ");
         var code = Console.ReadLine();
-        await proton.ProvideTwoFactorCodeAsync(code, CancellationToken.None).ConfigureAwait(false);
+        await proton.ProvideTwoFactorCodeAsync(code).ConfigureAwait(false);
     }
 
     PrintMessage($"""
@@ -80,8 +77,7 @@ try
     var countResponse = await proton.RequestAsync<TotalMessagesContent>(
         endpoint: new Uri("/mail/v4/messages/count", UriKind.Relative),
         method: HttpMethod.Get,
-        headers: null,
-        cancellationToken: CancellationToken.None).ConfigureAwait(false);
+        headers: null).ConfigureAwait(false);
 
     PrintMessage($"""
         Response to '/mail/v4/messages/count' request:
@@ -92,15 +88,14 @@ try
         endpoint: new Uri("/mail/v4/messages", UriKind.Relative),
         method: HttpMethod.Post,
         payload: new FilterPayload { Subject = "Welcome" },
-        headers: new HeaderCollection(new[] { ("X-HTTP-Method-Override", "GET") }),
-        cancellationToken: CancellationToken.None).ConfigureAwait(false);
+        headers: new HeaderCollection(new[] { ("X-HTTP-Method-Override", "GET") })).ConfigureAwait(false);
 
     PrintMessage($"""
         Response to '/mail/v4/messages?Subject=Welcome' request:
         {filterResponse}
         """);
 
-    await proton.LogoutAsync(CancellationToken.None).ConfigureAwait(false);
+    await proton.LogoutAsync().ConfigureAwait(false);
 }
 catch (ProtonRequestException ex)
 {

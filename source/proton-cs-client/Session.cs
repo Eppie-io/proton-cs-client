@@ -144,7 +144,7 @@ namespace Tuvi.Proton.Client
         /// <exception cref="Auth.Proton.Exceptions.AuthProtonException"></exception>
         /// <exception cref="Auth.Proton.Exceptions.AuthProtonArgumentException"></exception>
         /// <exception cref="Auth.Proton.Exceptions.AuthProtonRequestException"></exception>
-        public async Task LoginAsync(string username, string password, CancellationToken cancellationToken)
+        public async Task LoginAsync(string username, string password, CancellationToken cancellationToken = default)
         {
             var authenticator = await _broker.BuildAuthenticatorAsync(username, password, cancellationToken).ConfigureAwait(false);
             var data = await authenticator(cancellationToken).ConfigureAwait(false);
@@ -179,7 +179,7 @@ namespace Tuvi.Proton.Client
         /// <exception cref="ProtonSessionRequestException"></exception>
         /// <exception cref="Auth.Proton.Exceptions.AuthProtonArgumentException"></exception>
         /// <exception cref="Auth.Proton.Exceptions.AuthProtonRequestException"></exception>
-        public async Task ProvideTwoFactorCodeAsync(string code, CancellationToken cancellationToken)
+        public async Task ProvideTwoFactorCodeAsync(string code, CancellationToken cancellationToken = default)
         {
             var data = await _broker.ProvideTwoFactorCodeAsync(GetSessionData(), code, cancellationToken).ConfigureAwait(false);
 
@@ -198,7 +198,7 @@ namespace Tuvi.Proton.Client
         /// <returns>The task object representing the asynchronous operation.</returns>
         /// <exception cref="Auth.Proton.Exceptions.AuthProtonArgumentException"></exception>
         /// <exception cref="Auth.Proton.Exceptions.AuthProtonRequestException"></exception>
-        public async Task LogoutAsync(CancellationToken cancellationToken)
+        public async Task LogoutAsync(CancellationToken cancellationToken = default)
         {
             SessionData? sessionData = null;
             lock (_sharedStateLock)
@@ -222,7 +222,7 @@ namespace Tuvi.Proton.Client
         /// <returns>The task object representing the asynchronous operation.</returns>
         /// <exception cref="Auth.Proton.Exceptions.AuthProtonArgumentException"></exception>
         /// <exception cref="Auth.Proton.Exceptions.AuthProtonRequestException"></exception>
-        public async Task RefreshAsync(CancellationToken cancellationToken)
+        public async Task RefreshAsync(CancellationToken cancellationToken = default)
         {
             var (sessionData, refreshToken) = GetRefreshData();
             var data = await _broker.RefreshAsync(sessionData, refreshToken, cancellationToken).ConfigureAwait(false);
@@ -367,7 +367,7 @@ namespace Tuvi.Proton.Client
         /// <returns>Returns the value that results from deserializing the content as JSON.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ProtonSessionRequestException"></exception>
-        public async Task<TContent> RequestAsync<TContent, TPayload>(Uri endpoint, HttpMethod method, TPayload payload, HeaderCollection headers, CancellationToken cancellationToken)
+        public async Task<TContent> RequestAsync<TContent, TPayload>(Uri endpoint, HttpMethod method, TPayload payload, HeaderCollection headers, CancellationToken cancellationToken = default)
         {
             var message = new CustomMessage<TContent, TPayload>(endpoint, method, payload)
             {
@@ -395,7 +395,7 @@ namespace Tuvi.Proton.Client
         /// <returns>Returns the value that results from deserializing the content as JSON.</returns>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="ProtonSessionRequestException"></exception>
-        public async Task<TContent> RequestAsync<TContent>(Uri endpoint, HttpMethod method, HeaderCollection headers, CancellationToken cancellationToken)
+        public async Task<TContent> RequestAsync<TContent>(Uri endpoint, HttpMethod method, HeaderCollection headers, CancellationToken cancellationToken = default)
         {
             var message = new CustomMessage<TContent>(endpoint, method)
             {
