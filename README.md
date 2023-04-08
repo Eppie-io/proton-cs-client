@@ -1,4 +1,4 @@
-# Proton API C# Client
+# Proton API C# Client [![Build and Test](https://github.com/Eppie-io/proton-cs-client/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/Eppie-io/proton-cs-client/actions/workflows/build-and-test.yml)
 
 **Licence** [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 
