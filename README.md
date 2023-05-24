@@ -51,6 +51,19 @@ dotnet sln <solution-file> add --solution-folder submodules (ls -r **/proton-cs-
 dotnet add <project-file> reference (ls -r **/proton-cs-client.csproj)
 ```
 
+### Fix the BouncyCastle.Cryptography nuget [issue #447](https://github.com/bcgit/bc-csharp/issues/447)
+
+Force usage of BouncyCastle.Cryptography.dll for netstandard2.0 by adding the following to your .csproj:
+
+```xml
+  <ItemGroup>
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.1.1" ExcludeAssets="Compile" GeneratePathProperty="true" />
+    <Reference Include="BouncyCastle.Cryptography">
+      <HintPath>$(PkgBouncyCastle_Cryptography)\lib\netstandard2.0\BouncyCastle.Cryptography.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+```
+
 ## Usage
 
 ### Setup
