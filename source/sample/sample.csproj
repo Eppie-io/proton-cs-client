@@ -23,4 +23,13 @@
     <ProjectReference Include="..\proton-cs-client\proton-cs-client.csproj" />
   </ItemGroup>
 
+  <!-- In current version of BouncyCastle.Cryptography there is a problem with finding interfaces implementations.
+  So as temporarily solution we use next insertion taken from https://github.com/bcgit/bc-csharp/issues/447 -->
+  <ItemGroup>
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.2.1" ExcludeAssets="Compile" GeneratePathProperty="true" />
+    <Reference Include="BouncyCastle.Cryptography">
+      <HintPath>$(PkgBouncyCastle_Cryptography)\lib\netstandard2.0\BouncyCastle.Cryptography.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>
