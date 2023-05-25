@@ -57,7 +57,7 @@ Force usage of BouncyCastle.Cryptography.dll for netstandard2.0 by adding the fo
 
 ```xml
   <ItemGroup>
-    <PackageReference Include="BouncyCastle.Cryptography" Version="2.1.1" ExcludeAssets="Compile" GeneratePathProperty="true" />
+    <PackageReference Include="BouncyCastle.Cryptography" Version="2.2.1" ExcludeAssets="Compile" GeneratePathProperty="true" />
     <Reference Include="BouncyCastle.Cryptography">
       <HintPath>$(PkgBouncyCastle_Cryptography)\lib\netstandard2.0\BouncyCastle.Cryptography.dll</HintPath>
     </Reference>
