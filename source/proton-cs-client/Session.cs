@@ -424,7 +424,7 @@ namespace Tuvi.Proton.Client
             _broker.HumanVerificationToken = string.Empty;
         }
 
-        private SessionData GetSessionData()
+        public SessionData GetSessionData()
         {
             lock (_sharedStateLock)
             {
