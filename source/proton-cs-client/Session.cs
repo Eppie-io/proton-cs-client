@@ -157,7 +157,7 @@ namespace Tuvi.Proton.Client
             {
                 _sessionData = new SessionData()
                 {
-                    Uid = data.Uid,
+                    Uid = data.UID,
                     TokenType = data.TokenType,
                     AccessToken = data.AccessToken,
                 };
