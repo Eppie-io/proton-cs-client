@@ -14,6 +14,7 @@ updates:
     reviewers:
       - "al-kau"
       - "ValeraFinebits"
+      - "anatolse"
       
   # Maintain dependencies for gitsubmodule
   - package-ecosystem: "gitsubmodule"
@@ -23,3 +24,4 @@ updates:
     reviewers:
       - "al-kau"
       - "ValeraFinebits"
+      - "anatolse"
