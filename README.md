@@ -1,6 +1,8 @@
-# Proton API C# Client [![Build and Test](https://github.com/Eppie-io/proton-cs-client/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/Eppie-io/proton-cs-client/actions/workflows/build-and-test.yml)
+# Proton API C# Client
 
-**Licence** [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
+![Target](https://img.shields.io/badge/dynamic/xml?label=target&query=//TargetFramework[1]&url=https://raw.githubusercontent.com/Eppie-io/proton-cs-client/main/source/proton-cs-client/proton-cs-client.csproj)
+[![License](https://img.shields.io/github/license/Eppie-io/proton-cs-client.svg)](https://github.com/Eppie-io/proton-cs-client/blob/main/LICENSE)
+[![Main branch: build and test](https://img.shields.io/github/actions/workflow/status/Eppie-io/proton-cs-client/build-and-test.yml?branch=main&logo=github)](https://github.com/Eppie-io/proton-cs-client/actions/workflows/build-and-test.yml?query=branch%3Amain)
 
 ## Description
 
@@ -49,19 +51,6 @@ dotnet add <project-file> reference **/proton-cs-client.csproj
 dotnet sln <solution-file> add --solution-folder submodules (ls -r **/proton-cs-client.csproj) (ls -r **/*Lib.csproj)
 
 dotnet add <project-file> reference (ls -r **/proton-cs-client.csproj)
-```
-
-### Fix the BouncyCastle.Cryptography nuget [issue #447](https://github.com/bcgit/bc-csharp/issues/447)
-
-Force usage of BouncyCastle.Cryptography.dll for netstandard2.0 by adding the following to your .csproj:
-
-```xml
-  <ItemGroup>
-    <PackageReference Include="BouncyCastle.Cryptography" Version="2.2.1" ExcludeAssets="Compile" GeneratePathProperty="true" />
-    <Reference Include="BouncyCastle.Cryptography">
-      <HintPath>$(PkgBouncyCastle_Cryptography)\lib\netstandard2.0\BouncyCastle.Cryptography.dll</HintPath>
-    </Reference>
-  </ItemGroup>
 ```
 
 ## Usage
