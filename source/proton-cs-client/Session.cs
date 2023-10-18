@@ -71,6 +71,22 @@ namespace Tuvi.Proton.Client
         private int _passwordMode;
 
         /// <summary>
+        /// Gets a value that indicates the refresh token. It is filled out after login.
+        /// </summary>
+        public string RefreshToken
+        {
+            get { lock (_sharedStateLock) return _refreshToken; }
+        }
+
+        /// <summary>
+        /// Gets a value that indicates the user id. It is filled out after login.
+        /// </summary>
+        public string UserId
+        {
+            get { lock (_sharedStateLock) return _sessionData?.Uid; }
+        }
+
+        /// <summary>
         /// The API permission scopes. It is filled out after login.
         /// </summary>
         public string Scope
@@ -222,26 +238,10 @@ namespace Tuvi.Proton.Client
         /// <returns>The task object representing the asynchronous operation.</returns>
         /// <exception cref="Auth.Proton.Exceptions.AuthProtonArgumentException"></exception>
         /// <exception cref="Auth.Proton.Exceptions.AuthProtonRequestException"></exception>
-        public async Task RefreshAsync(CancellationToken cancellationToken = default)
+        public Task RefreshAsync(CancellationToken cancellationToken = default)
         {
             var (sessionData, refreshToken) = GetRefreshData();
-            var data = await _broker.RefreshAsync(sessionData, refreshToken, cancellationToken).ConfigureAwait(false);
-
-            EnsureCorrectResponse(data);
-
-            lock (_sharedStateLock)
-            {
-                _sessionData = new SessionData
-                {
-                    Uid = data.Uid,
-                    TokenType = data.TokenType,
-                    AccessToken = data.AccessToken,
-                };
-                _refreshToken = data.RefreshToken;
-                _scope = data.Scope;
-                _isTwoFactor = false;
-                _isTOTP = false;
-            }
+            return RefreshAsync(sessionData, refreshToken, cancellationToken);
 
             (SessionData, string) GetRefreshData()
             {
@@ -250,6 +250,24 @@ namespace Tuvi.Proton.Client
                     return (GetSessionData(_sessionData), _refreshToken);
                 }
             }
+        }
+
+        /// <summary>
+        ///  Refreshes Access token asynchronously.
+        /// </summary>
+        /// <param name="uid">User identifier</param>
+        /// <param name="refreshToken">Refresh token</param>
+        /// <param name="cancellationToken">The cancellation token to cancel operation.</param>
+        /// <returns>The task object representing the asynchronous operation.</returns>
+        /// <exception cref="Auth.Proton.Exceptions.AuthProtonArgumentException"></exception>
+        /// <exception cref="Auth.Proton.Exceptions.AuthProtonRequestException"></exception>
+        public Task RefreshAsync(string uid, string refreshToken, CancellationToken cancellationToken = default)
+        {
+            var sessionData = new SessionData
+            {
+                Uid = uid
+            };
+            return RefreshAsync(sessionData, refreshToken, cancellationToken);
         }
 
         /// <summary>
@@ -447,6 +465,27 @@ namespace Tuvi.Proton.Client
             if (!response.Success)
             {
                 throw new ProtonSessionRequestException("Proton response failed.", response);
+            }
+        }
+
+        private async Task RefreshAsync(SessionData sessionData, string refreshToken, CancellationToken cancellationToken)
+        {
+            var data = await _broker.RefreshAsync(sessionData, refreshToken, cancellationToken).ConfigureAwait(false);
+
+            EnsureCorrectResponse(data);
+
+            lock (_sharedStateLock)
+            {
+                _sessionData = new SessionData
+                {
+                    Uid = data.Uid,
+                    TokenType = data.TokenType,
+                    AccessToken = data.AccessToken,
+                };
+                _refreshToken = data.RefreshToken;
+                _scope = data.Scope;
+                _isTwoFactor = false;
+                _isTOTP = false;
             }
         }
     }
