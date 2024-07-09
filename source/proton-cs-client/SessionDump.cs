@@ -1,6 +1,6 @@
 ﻿////////////////////////////////////////////////////////////////////////////////
 //
-//   Copyright 2023 Eppie(https://eppie.io)
+//   Copyright 2024 Eppie(https://eppie.io)
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 using System;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 using Tuvi.Auth.Proton;
 
@@ -39,6 +40,9 @@ namespace Tuvi.Proton.Client
         public string AccessToken { get; private set; }
 
         [JsonInclude]
+        public long ExpirationTime { get; private set; }
+
+        [JsonInclude]
         public string TokenType { get; private set; }
 
         [JsonInclude]
@@ -54,38 +58,46 @@ namespace Tuvi.Proton.Client
         {
             return new SessionDump()
             {
-                Version = 1,
+                Version = 2,
                 Uid = sessionData.Uid,
                 AccessToken = sessionData.AccessToken,
                 TokenType = sessionData.TokenType,
+                ExpirationTime = sessionData.ExpirationTime,
                 RefreshToken = refreshToken,
                 PasswordMode = passwordMode,
                 Scope = scope
             };
         }
 
-        public bool Equals(SessionDump other)
-        {
-            return Version == other.Version &&
-                   string.Equals(Uid, other.Uid, StringComparison.Ordinal) &&
-                   string.Equals(AccessToken, other.AccessToken, StringComparison.Ordinal) &&
-                   string.Equals(TokenType, other.TokenType, StringComparison.Ordinal) &&
-                   string.Equals(RefreshToken, other.RefreshToken, StringComparison.Ordinal) &&
-                   PasswordMode == other.PasswordMode &&
-                   string.Equals(Scope, other.Scope, StringComparison.Ordinal);
-        }
-
         public override bool Equals(object obj)
         {
-            if (obj is SessionData sessionData)
-                return Equals(sessionData);
-
-            return false;
+            return obj is SessionData sessionData && Equals(sessionData);
         }
 
         public override int GetHashCode()
         {
-            return (Version, Uid, AccessToken, TokenType, RefreshToken, PasswordMode, Scope).GetHashCode();
+            int hashCode = -1425866907;
+            hashCode = hashCode * -1521134295 + Version.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Uid);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(AccessToken);
+            hashCode = hashCode * -1521134295 + ExpirationTime.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(TokenType);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(RefreshToken);
+            hashCode = hashCode * -1521134295 + PasswordMode.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Scope);
+            return hashCode;
+        }
+
+        public bool Equals(SessionDump other)
+        {
+            return Version == other.Version &&
+                   Uid == other.Uid &&
+                   AccessToken == other.AccessToken &&
+                   TokenType == other.TokenType &&
+                   ExpirationTime == other.ExpirationTime &&
+                   RefreshToken == other.RefreshToken &&
+                   PasswordMode == other.PasswordMode &&
+                   Scope == other.Scope;
         }
 
         public static bool operator ==(SessionDump left, SessionDump right)
