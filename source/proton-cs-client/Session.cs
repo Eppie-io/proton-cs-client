@@ -255,7 +255,7 @@ namespace Tuvi.Proton.Client
         }
 
         /// <summary>
-        ///  Refreshes Access token asynchronously.
+        /// Restores previous session asynchronously.
         /// </summary>
         /// <param name="uid">User identifier</param>
         /// <param name="refreshToken">Refresh token</param>
@@ -263,7 +263,7 @@ namespace Tuvi.Proton.Client
         /// <returns>The task object representing the asynchronous operation.</returns>
         /// <exception cref="Auth.Proton.Exceptions.AuthProtonArgumentException"></exception>
         /// <exception cref="Auth.Proton.Exceptions.AuthProtonRequestException"></exception>
-        public Task RefreshAsync(string uid, string refreshToken, CancellationToken cancellationToken = default)
+        public Task RestoreAsync(string uid, string refreshToken, CancellationToken cancellationToken = default)
         {
             var sessionData = new SessionData
             {
