@@ -1,6 +1,6 @@
 ﻿////////////////////////////////////////////////////////////////////////////////
 //
-//   Copyright 2023 Eppie(https://eppie.io)
+//   Copyright 2025 Eppie(https://eppie.io)
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+using Tuvi.Auth.Proton.Exceptions;
 using Tuvi.Proton.Client;
 using Tuvi.Proton.Client.Sample.Messages;
 using Tuvi.Proton.Primitive.Exceptions;
@@ -44,9 +45,9 @@ try
     {
         await proton.LoginAsync(user, password).ConfigureAwait(false);
     }
-    catch (ProtonRequestException ex)
+    catch (AuthUnsuccessProtonException ex)
     {
-        var (method, token) = TryHumanVerification(ex.ErrorInfo, host);
+        var (method, token) = TryHumanVerification(ex.Response, host);
         if (string.IsNullOrEmpty(method) || string.IsNullOrEmpty(token))
         {
             throw;
@@ -149,7 +150,7 @@ static (string? method, string? token) ShowHumanVerificationMessage(HumanVerific
 
     if (string.Equals("captcha", method, StringComparison.OrdinalIgnoreCase))
     {
-        Console.WriteLine($"Captcha url: {new Uri(host, details.CaptchaUri)}");
+        Console.WriteLine($"Captcha url: {new Uri(host, details.HumanVerificationApiUri)}");
     }
 
     Console.Write($"Enter verification token: ");
@@ -158,9 +159,9 @@ static (string? method, string? token) ShowHumanVerificationMessage(HumanVerific
     return (method, token);
 }
 
-static (string? method, string? token) TryHumanVerification(RequestErrorInfo error, Uri host)
+static (string? method, string? token) TryHumanVerification(CommonResponse response, Uri host)
 {
-    if (error?.IsHumanVerificationRequired() != true || error is not CommonResponse response)
+    if (response.IsHumanVerificationRequired() != true)
     {
         return (null, null);
     }
