@@ -8,12 +8,53 @@ updates:
 
   # Maintain dependencies for NuGet
   - package-ecosystem: "nuget"
-    directory: "/source/" # Location of package manifests
+    directory: "/source/"
     schedule:
       interval: "daily"
-      
+    open-pull-requests-limit: 20
+    commit-message:
+      prefix: "build"
+      include: "scope"
+    groups:
+      Microsoft:
+        patterns:
+          - "Microsoft.*"
+      Finebits:
+        patterns:
+          - "Finebits.*"
+
   # Maintain dependencies for gitsubmodule
   - package-ecosystem: "gitsubmodule"
-    directory: "/" # Location of package manifests
+    directory: "/"
     schedule:
       interval: "daily"
+    open-pull-requests-limit: 20
+    commit-message:
+      prefix: "build"
+      include: "scope"
+    groups:
+      submodules:
+        patterns:
+          - "*"
+
+  # Maintain dependencies for github-actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    labels:
+      - "github-actions"
+      - "dependencies"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    groups:
+      Common-actions:
+        patterns:
+          - "actions/*"
+      Finebits-actions:
+        patterns:
+          - "finebits/*"
+      GitHub-actions:
+        patterns:
+          - "github/*"
