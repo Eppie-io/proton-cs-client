@@ -40,9 +40,9 @@ namespace Tuvi.Proton.Client.Test
         }
 
         [Test]
-        public void LoginAsync_WrongArgument_Throws()
+        public async Task LoginAsync_WrongArgument_Throws()
         {
-            Assert.ThrowsAsync<AuthProtonArgumentException>(
+            await Assert.ThrowsAsync<AuthProtonArgumentException>(
                 async () =>
                 {
                     await ProtonSession.LoginAsync(
@@ -51,7 +51,7 @@ namespace Tuvi.Proton.Client.Test
                         cancellationToken: CancellationToken.None).ConfigureAwait(false);
                 });
 
-            Assert.ThrowsAsync<AuthProtonArgumentException>(
+            await Assert.ThrowsAsync<AuthProtonArgumentException>(
                 async () =>
                 {
                     await ProtonSession.LoginAsync(
@@ -60,7 +60,7 @@ namespace Tuvi.Proton.Client.Test
                         cancellationToken: CancellationToken.None).ConfigureAwait(false);
                 });
 
-            Assert.ThrowsAsync<AuthProtonArgumentException>(
+            await Assert.ThrowsAsync<AuthProtonArgumentException>(
                 async () =>
                 {
                     await ProtonSession.LoginAsync(
@@ -69,7 +69,7 @@ namespace Tuvi.Proton.Client.Test
                         cancellationToken: CancellationToken.None).ConfigureAwait(false);
                 });
 
-            Assert.ThrowsAsync<AuthProtonArgumentException>(
+            await Assert.ThrowsAsync<AuthProtonArgumentException>(
                 async () =>
                 {
                     await ProtonSession.LoginAsync(
@@ -78,7 +78,7 @@ namespace Tuvi.Proton.Client.Test
                         cancellationToken: CancellationToken.None).ConfigureAwait(false);
                 });
 
-            Assert.ThrowsAsync<AuthProtonArgumentException>(
+            await Assert.ThrowsAsync<AuthProtonArgumentException>(
                 async () =>
                 {
                     await ProtonSession.LoginAsync(
@@ -87,7 +87,7 @@ namespace Tuvi.Proton.Client.Test
                         cancellationToken: CancellationToken.None).ConfigureAwait(false);
                 });
 
-            Assert.ThrowsAsync<AuthProtonArgumentException>(
+            await Assert.ThrowsAsync<AuthProtonArgumentException>(
                 async () =>
                 {
                     await ProtonSession.LoginAsync(
@@ -96,7 +96,7 @@ namespace Tuvi.Proton.Client.Test
                         cancellationToken: CancellationToken.None).ConfigureAwait(false);
                 });
 
-            Assert.ThrowsAsync<AuthProtonArgumentException>(
+            await Assert.ThrowsAsync<AuthProtonArgumentException>(
                 async () =>
                 {
                     await ProtonSession.LoginAsync(
@@ -107,16 +107,16 @@ namespace Tuvi.Proton.Client.Test
         }
 
         [Test]
-        public void ProtonSession_UninitializedSession_Throws()
+        public async Task ProtonSession_UninitializedSession_Throws()
         {
-            Assert.ThrowsAsync<ProtonSessionException>(
+            await Assert.ThrowsAsync<ProtonSessionException>(
                 async () =>
                 {
                     await ProtonSession.RefreshAsync(
                         cancellationToken: CancellationToken.None).ConfigureAwait(false);
                 });
 
-            Assert.ThrowsAsync<ProtonSessionException>(
+            await Assert.ThrowsAsync<ProtonSessionException>(
                 async () =>
                 {
                     await ProtonSession.ProvideTwoFactorCodeAsync(
@@ -124,7 +124,7 @@ namespace Tuvi.Proton.Client.Test
                         cancellationToken: CancellationToken.None).ConfigureAwait(false);
                 });
 
-            Assert.ThrowsAsync<ProtonSessionException>(
+            await Assert.ThrowsAsync<ProtonSessionException>(
                 async () =>
                 {
                     await ProtonSession.LogoutAsync(
