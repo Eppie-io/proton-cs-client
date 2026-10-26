@@ -22,12 +22,18 @@ updates:
       Finebits:
         patterns:
           - "Finebits.*"
+      Tests:
+        patterns:
+          - "NUnit*"
+          - "Moq*"
 
   # Maintain dependencies for gitsubmodule
   - package-ecosystem: "gitsubmodule"
     directory: "/"
     schedule:
       interval: "daily"
+    cooldown:
+      default-days: 0
     open-pull-requests-limit: 20
     commit-message:
       prefix: "build"
